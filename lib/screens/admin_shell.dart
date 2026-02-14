@@ -5,7 +5,9 @@ import 'warehouse_screen.dart';
 import 'users_screen.dart';
 import 'inventory_screen.dart';
 import 'ai_analytics_screen.dart';
+import 'overrides_screen.dart';
 import 'audit_logs_screen.dart';
+import 'system_integrity_screen.dart';
 import 'profile_screen.dart';
 
 class AdminShell extends StatefulWidget {
@@ -24,7 +26,9 @@ class _AdminShellState extends State<AdminShell> {
     _NavItem(Icons.warehouse_rounded, 'Warehouse'),
     _NavItem(Icons.inventory_2_rounded, 'Inventory'),
     _NavItem(Icons.psychology_rounded, 'AI Analytics'),
+    _NavItem(Icons.compare_arrows_rounded, 'Overrides'),
     _NavItem(Icons.receipt_long_rounded, 'Audit Logs'),
+    _NavItem(Icons.security_rounded, 'System Integrity'),
   ];
 
   late final List<Widget> _screens = [
@@ -33,7 +37,9 @@ class _AdminShellState extends State<AdminShell> {
     const WarehouseScreen(),
     const InventoryScreen(),
     const AiAnalyticsScreen(),
+    const OverridesScreen(),
     const AuditLogsScreen(),
+    const SystemIntegrityScreen(),
     const ProfileScreen(),
   ];
 
@@ -99,7 +105,8 @@ class _AdminShellState extends State<AdminShell> {
   Widget _buildTopBar(bool isTablet, bool isPhone) {
     final titles = [
       'Dashboard', 'Users', 'Warehouse',
-      'Inventory', 'AI Analytics', 'Audit Logs', 'Profile',
+      'Inventory', 'AI Analytics', 'Overrides',
+      'Audit Logs', 'System Integrity', 'Profile',
     ];
     final titleSize = isPhone ? 20.0 : 28.0;
     final barHeight = isPhone ? 60.0 : 72.0;
@@ -185,7 +192,7 @@ class _AdminShellState extends State<AdminShell> {
             ),
           SizedBox(width: isPhone ? 4 : 8),
           InkWell(
-            onTap: () => _goTo(6), // Profile
+            onTap: () => _goTo(8), // Profile
             borderRadius: BorderRadius.circular(24),
             child: CircleAvatar(
               radius: isPhone ? 18 : 24,
@@ -219,7 +226,7 @@ class _AdminShellState extends State<AdminShell> {
           const Spacer(),
           const Divider(
               color: Colors.white24, height: 1, indent: 16, endIndent: 16),
-          _buildSidebarItem(6, icon: Icons.person_rounded, label: 'Profile'),
+          _buildSidebarItem(8, icon: Icons.person_rounded, label: 'Profile'),
           _buildSidebarLogout(),
           // BMS Sponsor - BIG
           Padding(
@@ -411,8 +418,8 @@ class _AdminShellState extends State<AdminShell> {
               icon: Icon(Icons.person_rounded,
                   size: 26,
                   color:
-                      _selectedIndex == 6 ? Colors.white : Colors.white60),
-              onPressed: () => _goTo(6),
+                      _selectedIndex == 8 ? Colors.white : Colors.white60),
+              onPressed: () => _goTo(8),
             ),
           ),
           Tooltip(
@@ -445,7 +452,7 @@ class _AdminShellState extends State<AdminShell> {
             const Spacer(),
             const Divider(
                 color: Colors.white24, height: 1, indent: 16, endIndent: 16),
-            _buildSidebarItem(6, icon: Icons.person_rounded, label: 'Profile'),
+            _buildSidebarItem(8, icon: Icons.person_rounded, label: 'Profile'),
             _buildSidebarLogout(),
             const SizedBox(height: 16),
           ],

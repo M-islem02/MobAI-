@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:flutter/material.dart' show Icons, IconData;
 import 'package:uuid/uuid.dart';
 
 const _uuid = Uuid();
@@ -408,6 +409,209 @@ class MockDataGenerator {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  TRANSACTION (matches data dictionary: transactions table)
+// ═══════════════════════════════════════════════════════════════
+
+class Transaction {
+  final String idTransaction;
+  String typeTransaction; // RECEIPT, MOVE, PICK, ADJUSTMENT
+  String referenceTransaction;
+  DateTime creeLe;
+  String creeParIdUtilisateur;
+  String statut; // DRAFT, CONFIRMED, CANCELLED
+  String notes;
+  List<TransactionLine> lines;
+
+  Color get statutColor {
+    switch (statut) {
+      case 'CONFIRMED': return AppColors.success;
+      case 'CANCELLED': return AppColors.error;
+      default: return AppColors.accent;
+    }
+  }
+
+  Transaction({
+    String? idTransaction,
+    required this.typeTransaction,
+    required this.referenceTransaction,
+    DateTime? creeLe,
+    required this.creeParIdUtilisateur,
+    this.statut = 'DRAFT',
+    this.notes = '',
+    List<TransactionLine>? lines,
+  })  : idTransaction = idTransaction ?? _uuid.v4(),
+        creeLe = creeLe ?? DateTime.now(),
+        lines = lines ?? [];
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TRANSACTION LINE (matches data dictionary: lignes_transaction)
+// ═══════════════════════════════════════════════════════════════
+
+class TransactionLine {
+  final String idTransaction;
+  int noLigne;
+  String idProduit;
+  int quantite;
+  String? emplacementSource;
+  String? emplacementDestination;
+  String? lotSerie;
+  String? codeMotif; // COUNT, DAMAGED, EXPIRY
+
+  TransactionLine({
+    required this.idTransaction,
+    required this.noLigne,
+    required this.idProduit,
+    required this.quantite,
+    this.emplacementSource,
+    this.emplacementDestination,
+    this.lotSerie,
+    this.codeMotif,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STOCK MOVEMENT (audit trail for FR-25, FR-26)
+// ═══════════════════════════════════════════════════════════════
+
+class StockMovement {
+  final String id;
+  String sku;
+  String productName;
+  String type; // receipt, transfer, pick, adjustment, delivery
+  int quantity;
+  String fromLocation;
+  String toLocation;
+  DateTime timestamp;
+  String performedBy;
+  String? transactionRef;
+
+  Color get typeColor {
+    switch (type) {
+      case 'receipt': return AppColors.success;
+      case 'transfer': return AppColors.aiBlue;
+      case 'pick': return AppColors.primary;
+      case 'adjustment': return AppColors.accent;
+      case 'delivery': return const Color(0xFF9C27B0);
+      default: return AppColors.archived;
+    }
+  }
+
+  IconData get typeIcon {
+    switch (type) {
+      case 'receipt': return Icons.download_rounded;
+      case 'transfer': return Icons.swap_horiz_rounded;
+      case 'pick': return Icons.shopping_basket_rounded;
+      case 'adjustment': return Icons.tune_rounded;
+      case 'delivery': return Icons.local_shipping_rounded;
+      default: return Icons.info_rounded;
+    }
+  }
+
+  StockMovement({
+    String? id,
+    required this.sku,
+    required this.productName,
+    required this.type,
+    required this.quantity,
+    required this.fromLocation,
+    required this.toLocation,
+    DateTime? timestamp,
+    required this.performedBy,
+    this.transactionRef,
+  })  : id = id ?? _uuid.v4(),
+        timestamp = timestamp ?? DateTime.now();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  OVERRIDE RECORD (FR-7, FR-8, FR-46, FR-47)
+// ═══════════════════════════════════════════════════════════════
+
+class OverrideRecord {
+  final String id;
+  String originalDecisionId;
+  String originalType;    // AI, Supervisor
+  String originalAction;  // reorder, relocate, route, preparation, picking
+  String description;
+  String justification;
+  String overriddenBy;
+  String overriddenByRole; // admin, supervisor
+  DateTime timestamp;
+  Map<String, String>? originalValues;
+  Map<String, String>? newValues;
+
+  Color get roleColor {
+    switch (overriddenByRole) {
+      case 'admin': return AppColors.primaryDark;
+      case 'supervisor': return AppColors.aiBlue;
+      default: return AppColors.archived;
+    }
+  }
+
+  OverrideRecord({
+    String? id,
+    required this.originalDecisionId,
+    required this.originalType,
+    required this.originalAction,
+    required this.description,
+    required this.justification,
+    required this.overriddenBy,
+    this.overriddenByRole = 'admin',
+    DateTime? timestamp,
+    this.originalValues,
+    this.newValues,
+  })  : id = id ?? _uuid.v4(),
+        timestamp = timestamp ?? DateTime.now();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SYSTEM CHECK RESULT (for system integrity screen)
+// ═══════════════════════════════════════════════════════════════
+
+class SystemCheckResult {
+  final String id;
+  String category; // stock, users, transactions, locations
+  String checkName;
+  String status; // passed, warning, failed
+  String details;
+  DateTime lastRun;
+  int? affectedRecords;
+
+  Color get statusColor {
+    switch (status) {
+      case 'passed': return AppColors.success;
+      case 'warning': return AppColors.accent;
+      case 'failed': return AppColors.error;
+      default: return AppColors.archived;
+    }
+  }
+
+  IconData get statusIcon {
+    switch (status) {
+      case 'passed': return Icons.check_circle_rounded;
+      case 'warning': return Icons.warning_rounded;
+      case 'failed': return Icons.error_rounded;
+      default: return Icons.help_rounded;
+    }
+  }
+
+  SystemCheckResult({
+    String? id,
+    required this.category,
+    required this.checkName,
+    required this.status,
+    required this.details,
+    DateTime? lastRun,
+    this.affectedRecords,
+  })  : id = id ?? _uuid.v4(),
+        lastRun = lastRun ?? DateTime.now();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MOCK AUTH SERVICE
+// ═══════════════════════════════════════════════════════════════
+
 class MockAuthService {
   static final List<AppUser> users = MockDataGenerator.generateUsers();
 
@@ -421,5 +625,194 @@ class MockAuthService {
       }
     }
     return null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MOCK WAREHOUSE DATA (shared state for admin screens)
+// ═══════════════════════════════════════════════════════════════
+
+class MockWarehouseState {
+  // Singleton lists for shared state across screens
+  static final List<Transaction> transactions = _generateTransactions();
+  static final List<StockMovement> stockMovements = _generateStockMovements();
+  static final List<OverrideRecord> overrides = _generateOverrides();
+  static final List<SystemCheckResult> systemChecks = _generateSystemChecks();
+
+  static List<Transaction> _generateTransactions() {
+    final now = DateTime.now();
+    return [
+      Transaction(
+        idTransaction: 'T0001',
+        typeTransaction: 'RECEIPT',
+        referenceTransaction: 'RCV-2026-0001',
+        creeLe: now.subtract(const Duration(hours: 2)),
+        creeParIdUtilisateur: 'U001',
+        statut: 'CONFIRMED',
+        notes: 'Inbound from supplier X',
+        lines: [
+          TransactionLine(idTransaction: 'T0001', noLigne: 1, idProduit: 'P001', quantite: 120, emplacementDestination: 'B7-N1-C7', lotSerie: 'BATCH-24A'),
+          TransactionLine(idTransaction: 'T0001', noLigne: 2, idProduit: 'P002', quantite: 60, emplacementDestination: 'B7-N1-C8'),
+        ],
+      ),
+      Transaction(
+        idTransaction: 'T0002',
+        typeTransaction: 'MOVE',
+        referenceTransaction: 'TRF-2026-0012',
+        creeLe: now.subtract(const Duration(hours: 4)),
+        creeParIdUtilisateur: 'U003',
+        statut: 'CONFIRMED',
+        notes: 'Transfer to floor 2 storage',
+        lines: [
+          TransactionLine(idTransaction: 'T0002', noLigne: 1, idProduit: 'P003', quantite: 45, emplacementSource: 'B7-N1-C2', emplacementDestination: 'B7-N2-D5'),
+        ],
+      ),
+      Transaction(
+        idTransaction: 'T0003',
+        typeTransaction: 'PICK',
+        referenceTransaction: 'PCK-2026-0008',
+        creeLe: now.subtract(const Duration(hours: 6)),
+        creeParIdUtilisateur: 'U004',
+        statut: 'CONFIRMED',
+        notes: 'Pick for delivery order',
+        lines: [
+          TransactionLine(idTransaction: 'T0003', noLigne: 1, idProduit: 'P001', quantite: 30, emplacementSource: 'B7-N1-C7', emplacementDestination: 'B7-0A-02-01'),
+          TransactionLine(idTransaction: 'T0003', noLigne: 2, idProduit: 'P005', quantite: 15, emplacementSource: 'B7-N3-D8', emplacementDestination: 'B7-0A-03-01'),
+        ],
+      ),
+      Transaction(
+        idTransaction: 'T0004',
+        typeTransaction: 'ADJUSTMENT',
+        referenceTransaction: 'ADJ-2026-0003',
+        creeLe: now.subtract(const Duration(hours: 8)),
+        creeParIdUtilisateur: 'U001',
+        statut: 'CONFIRMED',
+        notes: 'Inventory count correction',
+        lines: [
+          TransactionLine(idTransaction: 'T0004', noLigne: 1, idProduit: 'P004', quantite: -5, emplacementSource: 'B7-N2-C3', codeMotif: 'DAMAGED'),
+        ],
+      ),
+      Transaction(
+        idTransaction: 'T0005',
+        typeTransaction: 'RECEIPT',
+        referenceTransaction: 'RCV-2026-0002',
+        creeLe: now.subtract(const Duration(days: 1)),
+        creeParIdUtilisateur: 'U003',
+        statut: 'DRAFT',
+        notes: 'Pending receipt from supplier Y',
+        lines: [
+          TransactionLine(idTransaction: 'T0005', noLigne: 1, idProduit: 'P006', quantite: 200, emplacementDestination: 'B7-N1-C5'),
+        ],
+      ),
+      Transaction(
+        idTransaction: 'T0006',
+        typeTransaction: 'PICK',
+        referenceTransaction: 'PCK-2026-0009',
+        creeLe: now.subtract(const Duration(days: 1, hours: 3)),
+        creeParIdUtilisateur: 'U005',
+        statut: 'CANCELLED',
+        notes: 'Cancelled — customer order withdrawn',
+      ),
+    ];
+  }
+
+  static List<StockMovement> _generateStockMovements() {
+    final now = DateTime.now();
+    return [
+      StockMovement(sku: 'ELC-001', productName: 'Câble H07V-U 2.5mm²', type: 'receipt', quantity: 120, fromLocation: 'SUPPLIER', toLocation: 'B7-N1-C7', timestamp: now.subtract(const Duration(hours: 1)), performedBy: 'Youcef Slimani', transactionRef: 'RCV-2026-0001'),
+      StockMovement(sku: 'ELC-002', productName: 'Disjoncteur 16A', type: 'transfer', quantity: 30, fromLocation: 'B7-N1-C8', toLocation: 'B7-N2-D5', timestamp: now.subtract(const Duration(hours: 2)), performedBy: 'Mohamed Aissani', transactionRef: 'TRF-2026-0012'),
+      StockMovement(sku: 'ELC-001', productName: 'Câble H07V-U 2.5mm²', type: 'pick', quantity: 50, fromLocation: 'B7-N1-C7', toLocation: 'B7-0A-02-01', timestamp: now.subtract(const Duration(hours: 3)), performedBy: 'Fatima Zahra', transactionRef: 'PCK-2026-0008'),
+      StockMovement(sku: 'HDW-001', productName: 'Boulon M10x60 (x100)', type: 'delivery', quantity: 80, fromLocation: 'B7-0A-02-01', toLocation: 'EXPEDITION', timestamp: now.subtract(const Duration(hours: 4)), performedBy: 'Sara Belkacem', transactionRef: 'DLV-2026-0015'),
+      StockMovement(sku: 'HDW-002', productName: 'Vis autoperceuse 4.8x25', type: 'adjustment', quantity: -5, fromLocation: 'B7-N2-C3', toLocation: '—', timestamp: now.subtract(const Duration(hours: 6)), performedBy: 'Admin Principal', transactionRef: 'ADJ-2026-0003'),
+      StockMovement(sku: 'SAF-001', productName: 'Casque de chantier', type: 'receipt', quantity: 40, fromLocation: 'SUPPLIER', toLocation: 'B7-N3-E2', timestamp: now.subtract(const Duration(hours: 8)), performedBy: 'Youcef Slimani', transactionRef: 'RCV-2026-0003'),
+      StockMovement(sku: 'TLS-001', productName: 'Perceuse sans fil 18V', type: 'pick', quantity: 5, fromLocation: 'B7-N2-D1', toLocation: 'B7-0A-04-01', timestamp: now.subtract(const Duration(hours: 10)), performedBy: 'Mohamed Aissani', transactionRef: 'PCK-2026-0010'),
+      StockMovement(sku: 'ELC-003', productName: 'Prise murale double', type: 'transfer', quantity: 60, fromLocation: 'B7-N1-A3', toLocation: 'B7-N3-C4', timestamp: now.subtract(const Duration(hours: 12)), performedBy: 'Fatima Zahra', transactionRef: 'TRF-2026-0013'),
+      StockMovement(sku: 'PKG-001', productName: 'Carton 60x40x30', type: 'delivery', quantity: 200, fromLocation: 'B7-0A-05-01', toLocation: 'EXPEDITION', timestamp: now.subtract(const Duration(days: 1)), performedBy: 'Sara Belkacem', transactionRef: 'DLV-2026-0016'),
+      StockMovement(sku: 'SAF-002', productName: 'Gants isolants CL2', type: 'receipt', quantity: 25, fromLocation: 'SUPPLIER', toLocation: 'B7-N1-C2', timestamp: now.subtract(const Duration(days: 1, hours: 2)), performedBy: 'Youcef Slimani', transactionRef: 'RCV-2026-0004'),
+      StockMovement(sku: 'ELC-004', productName: 'Tableau électrique 13M', type: 'pick', quantity: 8, fromLocation: 'B7-N2-A4', toLocation: 'B7-0A-01-02', timestamp: now.subtract(const Duration(days: 1, hours: 5)), performedBy: 'Mohamed Aissani', transactionRef: 'PCK-2026-0011'),
+      StockMovement(sku: 'HDW-003', productName: 'Cheville chimique M12', type: 'adjustment', quantity: 10, fromLocation: '—', toLocation: 'B7-N1-B3', timestamp: now.subtract(const Duration(days: 2)), performedBy: 'Admin Principal', transactionRef: 'ADJ-2026-0004'),
+    ];
+  }
+
+  static List<OverrideRecord> _generateOverrides() {
+    final now = DateTime.now();
+    return [
+      OverrideRecord(
+        originalDecisionId: 'ai-001',
+        originalType: 'AI',
+        originalAction: 'route',
+        description: 'Override AI picking route on Floor 1 — shorter manual path identified',
+        justification: 'Manual inspection revealed blocked aisle on AI-suggested route. Using alternative path via D-row.',
+        overriddenBy: 'Karim Bensalah',
+        overriddenByRole: 'supervisor',
+        timestamp: now.subtract(const Duration(hours: 3)),
+        originalValues: {'route': 'A3 → C7 → E9 → Expedition', 'distance': '45m'},
+        newValues: {'route': 'A3 → D4 → E9 → Expedition', 'distance': '38m'},
+      ),
+      OverrideRecord(
+        originalDecisionId: 'ai-002',
+        originalType: 'AI',
+        originalAction: 'reorder',
+        description: 'Cancel AI auto-reorder for HDW-002 — supplier delivery delay',
+        justification: 'Supplier confirmed 2-week delay. Cancelling auto-reorder and sourcing from alternative.',
+        overriddenBy: 'Admin Principal',
+        overriddenByRole: 'admin',
+        timestamp: now.subtract(const Duration(hours: 6)),
+        originalValues: {'action': 'reorder', 'quantity': '200', 'supplier': 'Supplier A'},
+        newValues: {'action': 'cancelled', 'reason': 'Supplier delay — sourcing alternative'},
+      ),
+      OverrideRecord(
+        originalDecisionId: 'ai-003',
+        originalType: 'AI',
+        originalAction: 'relocate',
+        description: 'Override AI storage suggestion — keep slow-movers in Zone D',
+        justification: 'Consolidation would disrupt ongoing inventory count. Postpone until next week.',
+        overriddenBy: 'Amina Rachedi',
+        overriddenByRole: 'supervisor',
+        timestamp: now.subtract(const Duration(hours: 12)),
+      ),
+      OverrideRecord(
+        originalDecisionId: 'sv-001',
+        originalType: 'Supervisor',
+        originalAction: 'preparation',
+        description: 'Admin override of Supervisor preparation order — added urgent items',
+        justification: 'Priority customer order received. Adding 3 additional SKUs to preparation batch.',
+        overriddenBy: 'Admin Principal',
+        overriddenByRole: 'admin',
+        timestamp: now.subtract(const Duration(days: 1)),
+        originalValues: {'items': '5 SKUs', 'priority': 'normal'},
+        newValues: {'items': '8 SKUs', 'priority': 'urgent'},
+      ),
+      OverrideRecord(
+        originalDecisionId: 'ai-004',
+        originalType: 'AI',
+        originalAction: 'picking',
+        description: 'Override AI picking location — damaged rack detected',
+        justification: 'Rack B7-N3-D8 reported structural damage. Rerouting pick to B7-N3-D6.',
+        overriddenBy: 'Admin Principal',
+        overriddenByRole: 'admin',
+        timestamp: now.subtract(const Duration(days: 1, hours: 5)),
+        originalValues: {'location': 'B7-N3-D8'},
+        newValues: {'location': 'B7-N3-D6'},
+      ),
+    ];
+  }
+
+  static List<SystemCheckResult> _generateSystemChecks() {
+    final now = DateTime.now();
+    return [
+      SystemCheckResult(category: 'stock', checkName: 'Negative Stock Detection', status: 'passed', details: 'No products have negative stock quantities.', lastRun: now.subtract(const Duration(minutes: 5)), affectedRecords: 0),
+      SystemCheckResult(category: 'stock', checkName: 'Stock vs. Transaction Consistency', status: 'passed', details: 'All stock levels match transaction ledger totals.', lastRun: now.subtract(const Duration(minutes: 5)), affectedRecords: 0),
+      SystemCheckResult(category: 'stock', checkName: 'Orphan Stock Entries', status: 'warning', details: '2 stock entries reference deleted products.', lastRun: now.subtract(const Duration(minutes: 5)), affectedRecords: 2),
+      SystemCheckResult(category: 'locations', checkName: 'Unique Location Codes', status: 'passed', details: 'All location codes are unique across warehouses.', lastRun: now.subtract(const Duration(minutes: 10)), affectedRecords: 0),
+      SystemCheckResult(category: 'locations', checkName: 'Location Capacity Check', status: 'warning', details: '3 locations exceed 95% capacity threshold.', lastRun: now.subtract(const Duration(minutes: 10)), affectedRecords: 3),
+      SystemCheckResult(category: 'users', checkName: 'Duplicate User Detection', status: 'passed', details: 'No duplicate usernames or emails detected.', lastRun: now.subtract(const Duration(minutes: 15)), affectedRecords: 0),
+      SystemCheckResult(category: 'users', checkName: 'Inactive User Audit', status: 'warning', details: '1 user inactive for over 14 days without justification.', lastRun: now.subtract(const Duration(minutes: 15)), affectedRecords: 1),
+      SystemCheckResult(category: 'transactions', checkName: 'Draft Transaction Age', status: 'warning', details: '1 draft transaction is over 24 hours old.', lastRun: now.subtract(const Duration(minutes: 20)), affectedRecords: 1),
+      SystemCheckResult(category: 'transactions', checkName: 'Transaction Atomicity', status: 'passed', details: 'All confirmed transactions have complete line items.', lastRun: now.subtract(const Duration(minutes: 20)), affectedRecords: 0),
+      SystemCheckResult(category: 'transactions', checkName: 'Override Audit Trail', status: 'passed', details: 'All overrides have justification and audit log entries.', lastRun: now.subtract(const Duration(minutes: 25)), affectedRecords: 0),
+      SystemCheckResult(category: 'stock', checkName: 'Reorder Point Alert', status: 'failed', details: '2 SKUs below minimum stock with no open purchase orders.', lastRun: now.subtract(const Duration(minutes: 30)), affectedRecords: 2),
+      SystemCheckResult(category: 'locations', checkName: 'Active Location Validation', status: 'passed', details: 'All active locations belong to active warehouses.', lastRun: now.subtract(const Duration(minutes: 30)), affectedRecords: 0),
+    ];
   }
 }

@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import '../models/admin_data.dart';
 import '../widgets/mini_charts.dart';
 
-class AiAnalyticsScreen extends StatelessWidget {
+class AiAnalyticsScreen extends StatefulWidget {
   const AiAnalyticsScreen({super.key});
+  @override
+  State<AiAnalyticsScreen> createState() => _AiAnalyticsScreenState();
+}
+
+class _AiAnalyticsScreenState extends State<AiAnalyticsScreen> {
+  late List<AiDecision> decisions;
+
+  @override
+  void initState() {
+    super.initState();
+    decisions = MockDataGenerator.generateAiDecisions();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final decisions = MockDataGenerator.generateAiDecisions();
     final approved = decisions.where((d) => d.status == 'approved').length;
     final overridden = decisions.where((d) => d.status == 'overridden').length;
     final pending = decisions.where((d) => d.status == 'pending').length;
@@ -249,6 +260,22 @@ class AiAnalyticsScreen extends StatelessWidget {
                   decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(6)),
                   child: Text('${(d.confidence * 100).toStringAsFixed(0)}%', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMid)),
                 ),
+                if (d.status == 'pending' || d.status == 'approved') ...[
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 28,
+                    child: OutlinedButton(
+                      onPressed: () => _showOverrideDialog(context, d),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.accent,
+                        side: BorderSide(color: AppColors.accent.withValues(alpha: 0.4)),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      ),
+                      child: const Text('Override', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
               ]),
             )),
       ]),
@@ -278,6 +305,88 @@ class AiAnalyticsScreen extends StatelessWidget {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     return '${diff.inDays}d ago';
+  }
+
+  void _showOverrideDialog(BuildContext context, AiDecision decision) {
+    final justificationCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(children: [
+          Icon(Icons.compare_arrows_rounded, color: AppColors.accent),
+          SizedBox(width: 8),
+          Text('Override AI Decision'),
+        ]),
+        content: SizedBox(
+          width: 440,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(10)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(decision.description, style: const TextStyle(fontSize: 12, color: AppColors.textDark)),
+                    const SizedBox(height: 4),
+                    Text('Confidence: ${(decision.confidence * 100).toStringAsFixed(0)}%', style: const TextStyle(fontSize: 11, color: AppColors.textMid)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: justificationCtrl,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Justification (required — FR-8)',
+                  hintText: 'Explain why...',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              if (justificationCtrl.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Justification is required'), backgroundColor: AppColors.error),
+                );
+                return;
+              }
+              setState(() {
+                decision.status = 'overridden';
+                decision.userName = 'Admin Principal';
+              });
+              // Log override
+              MockWarehouseState.overrides.insert(
+                0,
+                OverrideRecord(
+                  originalDecisionId: decision.id,
+                  originalType: 'AI',
+                  originalAction: decision.action,
+                  description: 'Admin override: ${decision.description}',
+                  justification: justificationCtrl.text.trim(),
+                  overriddenBy: 'Admin Principal',
+                  overriddenByRole: 'admin',
+                ),
+              );
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Decision overridden successfully'), backgroundColor: AppColors.success),
+              );
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+            child: const Text('Override'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
