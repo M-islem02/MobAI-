@@ -34,6 +34,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   List<String> get _categories => _products.map((p) => p.category).toSet().toList();
 
+  void _showSnack(String message, {Color color = AppColors.primary}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -89,6 +99,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
           _summaryChip('${_products.length}', 'Products', AppColors.primary),
           _summaryChip('${_products.where((p) => p.status == 'low-stock').length}', 'Low Stock', AppColors.accent),
           _summaryChip('${_products.where((p) => p.status == 'out-of-stock').length}', 'Out', AppColors.error),
+          FilledButton.icon(
+            onPressed: () => _showProductDialog(),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add Product'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
         ],
       ),
     );
@@ -186,6 +206,25 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 ]),
               ),
               const SizedBox(width: 8),
+              IconButton(
+                tooltip: 'Adjust stock',
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _showStockDialog(p),
+                icon: const Icon(Icons.tune_rounded, size: 18, color: AppColors.textMid),
+              ),
+              IconButton(
+                tooltip: 'Edit product',
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _showProductDialog(existing: p),
+                icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.textMid),
+              ),
+              IconButton(
+                tooltip: 'Delete product',
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _confirmDeleteProduct(p),
+                icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+              ),
+              const SizedBox(width: 8),
               Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: AppColors.textLight),
             ]),
             // Expanded detail
@@ -276,6 +315,198 @@ class _InventoryScreenState extends State<InventoryScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
       child: Text(text, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+    );
+  }
+
+  void _showProductDialog({Product? existing}) {
+    final skuCtrl = TextEditingController(text: existing?.sku ?? '');
+    final nameCtrl = TextEditingController(text: existing?.name ?? '');
+    final categoryCtrl = TextEditingController(text: existing?.category ?? 'General');
+    final qtyCtrl = TextEditingController(text: '${existing?.quantity ?? 0}');
+    final minCtrl = TextEditingController(text: '${existing?.minStock ?? 10}');
+    final maxCtrl = TextEditingController(text: '${existing?.maxStock ?? 100}');
+    final locationCtrl = TextEditingController(text: existing?.locationLabel ?? 'A-01');
+    final priceCtrl = TextEditingController(text: '${existing?.price ?? 0}');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(existing == null ? Icons.inventory_2_outlined : Icons.edit, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(existing == null ? 'New Product' : 'Edit Product'),
+          ],
+        ),
+        content: SizedBox(
+          width: 460,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: skuCtrl, decoration: const InputDecoration(labelText: 'SKU')),
+                const SizedBox(height: 10),
+                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name')),
+                const SizedBox(height: 10),
+                TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: 'Category')),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(child: TextField(controller: qtyCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Quantity'))),
+                    const SizedBox(width: 10),
+                    Expanded(child: TextField(controller: minCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Min Stock'))),
+                    const SizedBox(width: 10),
+                    Expanded(child: TextField(controller: maxCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Max Stock'))),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(child: TextField(controller: locationCtrl, decoration: const InputDecoration(labelText: 'Location'))),
+                    const SizedBox(width: 10),
+                    Expanded(child: TextField(controller: priceCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Price'))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final sku = skuCtrl.text.trim();
+              final name = nameCtrl.text.trim();
+              final category = categoryCtrl.text.trim();
+              final quantity = int.tryParse(qtyCtrl.text.trim()) ?? 0;
+              final minStock = int.tryParse(minCtrl.text.trim()) ?? 0;
+              final maxStock = int.tryParse(maxCtrl.text.trim()) ?? 0;
+              final location = locationCtrl.text.trim();
+              final price = double.tryParse(priceCtrl.text.trim()) ?? 0;
+
+              if (sku.isEmpty || name.isEmpty || category.isEmpty || location.isEmpty) {
+                _showSnack('Please fill all required fields', color: AppColors.error);
+                return;
+              }
+              if (maxStock < minStock) {
+                _showSnack('Max stock must be >= min stock', color: AppColors.error);
+                return;
+              }
+
+              setState(() {
+                if (existing == null) {
+                  _products.add(
+                    Product(
+                      sku: sku,
+                      name: name,
+                      category: category,
+                      quantity: quantity,
+                      minStock: minStock,
+                      maxStock: maxStock,
+                      locationLabel: location,
+                      price: price,
+                    ),
+                  );
+                } else {
+                  existing.sku = sku;
+                  existing.name = name;
+                  existing.category = category;
+                  existing.quantity = quantity;
+                  existing.minStock = minStock;
+                  existing.maxStock = maxStock;
+                  existing.locationLabel = location;
+                  existing.price = price;
+                  existing.lastUpdated = DateTime.now();
+                }
+              });
+
+              Navigator.pop(ctx);
+              _showSnack(existing == null ? 'Product added' : 'Product updated');
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(existing == null ? 'Create' : 'Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showStockDialog(Product p) {
+    final ctrl = TextEditingController(text: '${p.quantity}');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.tune_rounded, color: AppColors.primary),
+            SizedBox(width: 8),
+            Text('Adjust Stock'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${p.sku} • ${p.name}', style: const TextStyle(fontSize: 12, color: AppColors.textMid)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ctrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'New Quantity'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () {
+              final q = int.tryParse(ctrl.text.trim());
+              if (q == null || q < 0) {
+                _showSnack('Quantity must be a non-negative integer', color: AppColors.error);
+                return;
+              }
+              setState(() {
+                p.quantity = q;
+                p.lastUpdated = DateTime.now();
+              });
+              Navigator.pop(ctx);
+              _showSnack('Stock updated');
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteProduct(Product p) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppColors.error),
+            SizedBox(width: 8),
+            Text('Delete Product?'),
+          ],
+        ),
+        content: Text('Remove "${p.name}" (${p.sku}) permanently?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() => _products.removeWhere((x) => x.id == p.id));
+              _showSnack('Product deleted', color: AppColors.error);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
   }
 
