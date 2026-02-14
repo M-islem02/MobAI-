@@ -214,7 +214,7 @@ class _AdminShellState extends State<AdminShell> {
       child: Column(
         children: [
           _buildSidebarHeader(),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           ...List.generate(_navItems.length, (i) => _buildSidebarItem(i)),
           const Spacer(),
           const Divider(
@@ -251,35 +251,38 @@ class _AdminShellState extends State<AdminShell> {
 
   Widget _buildSidebarHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+      padding: const EdgeInsets.fromLTRB(20, 26, 20, 18),
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 74,
+            height: 74,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
+              color: Colors.white.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
             padding: const EdgeInsets.all(8),
             child: Image.asset(
               'assets/images/ant_logo.png',
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.warehouse, color: Colors.white, size: 30),
+                  const Icon(Icons.warehouse, color: Colors.white, size: 34),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Namla',
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold)),
-              Text('WMS Admin',
-                  style: TextStyle(color: Colors.white60, fontSize: 16)),
+                      fontSize: 25,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5)),
+              SizedBox(height: 2),
+              Text('Warehouse',
+                  style: TextStyle(color: Colors.white70, fontSize: 13)),
             ],
           ),
         ],
@@ -294,9 +297,9 @@ class _AdminShellState extends State<AdminShell> {
     final lb = label ?? item!.label;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       child: Material(
-        color: isActive ? AppColors.sidebarHover : Colors.transparent,
+        color: isActive ? const Color(0xFF1A9BB5) : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -307,13 +310,13 @@ class _AdminShellState extends State<AdminShell> {
             child: Row(
               children: [
                 Icon(ic,
-                    size: 24,
+                    size: 23,
                     color: isActive ? Colors.white : Colors.white60),
                 const SizedBox(width: 14),
                 Text(lb,
                     style: TextStyle(
                       color: isActive ? Colors.white : Colors.white70,
-                      fontSize: 18,
+                      fontSize: 30 / 2,
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                     )),
               ],
@@ -358,13 +361,14 @@ class _AdminShellState extends State<AdminShell> {
       color: AppColors.sidebar,
       child: Column(
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Container(
-            width: 56,
-            height: 56,
+            width: 62,
+            height: 62,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
             padding: const EdgeInsets.all(8),
             child: Image.asset(
@@ -374,7 +378,7 @@ class _AdminShellState extends State<AdminShell> {
                   const Icon(Icons.warehouse, color: Colors.white, size: 28),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           ...List.generate(_navItems.length, (i) {
             final isActive = _selectedIndex == i;
             return Tooltip(

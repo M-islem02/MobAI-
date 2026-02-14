@@ -11,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _emailCtrl = TextEditingController(text: 'admin');
-  final _passwordCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController(text: 'admin123');
   bool _obscurePassword = true;
   bool _loading = false;
 
@@ -162,25 +162,33 @@ class _LoginScreenState extends State<LoginScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Ant mascot – BIG 400px
-                  Image.asset(
-                    'assets/images/ant_logo.png',
-                    width: 400,
-                    height: 400,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.warehouse_rounded,
-                      size: 160,
-                      color: Colors.white54,
+                  Container(
+                    width: 340,
+                    height: 340,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                    ),
+                    padding: const EdgeInsets.all(22),
+                    child: Image.asset(
+                      'assets/images/ant_logo.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.warehouse_rounded,
+                        size: 160,
+                        color: Colors.white54,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
                   const Text(
                     'Namla',
                     style: TextStyle(
                       fontSize: 52,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w500,
                       color: Colors.white,
-                      letterSpacing: 2,
+                      letterSpacing: 1,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -188,9 +196,9 @@ class _LoginScreenState extends State<LoginScreen>
                     'WAREHOUSE MANAGEMENT SYSTEM',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       color: Colors.white70,
-                      letterSpacing: 4,
+                      letterSpacing: 3,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -268,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen>
             'Namla WMS',
             style: TextStyle(
               fontSize: isPhone ? 28 : 36,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: AppColors.textDark,
             ),
           ),
