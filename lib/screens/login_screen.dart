@@ -10,7 +10,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  final _emailCtrl = TextEditingController(text: 'admin@namla.dz');
+  final _emailCtrl = TextEditingController(text: 'admin');
   final _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
   bool _loading = false;
@@ -36,8 +36,48 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _signIn() async {
+    final identifier = _emailCtrl.text.trim();
+    final password = _passwordCtrl.text;
+    if (identifier.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter username/email and password')),
+      );
+      return;
+    }
+
     setState(() => _loading = true);
     await Future.delayed(const Duration(milliseconds: 800));
+
+    final user = MockAuthService.authenticate(identifier, password);
+
+    if (!mounted) return;
+
+    if (user == null) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid credentials')),
+      );
+      return;
+    }
+
+    if (user.role != 'admin') {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Only admin can access this web interface')),
+      );
+      return;
+    }
+
+    if (!user.canAuthenticate) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account is disabled or locked')),
+      );
+      return;
+    }
+
+    user.lastLogin = DateTime.now();
+
     if (mounted) {
       Navigator.of(context).pushReplacementNamed('/admin');
     }
@@ -301,10 +341,10 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         SizedBox(height: gap),
 
-        // ── Email ──
+        // ── Username / Email ──
         _buildTextField(
           controller: _emailCtrl,
-          hint: 'Email',
+          hint: 'Username or Email',
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           height: inputHeight,

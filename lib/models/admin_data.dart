@@ -40,23 +40,54 @@ class AppColors {
 class AppUser {
   final String id;
   String name;
+  String username;
   String email;
+  String password;
+  String firstName;
+  String lastName;
   String role;   // admin, supervisor, employee
   String status; // active, inactive, suspended
+  bool active;
+  bool accountNonExpired;
+  bool accountNonLocked;
+  bool credentialsNonExpired;
   DateTime createdAt;
   DateTime? lastLogin;
   Color avatarColor;
 
+  String get fullName => '$firstName $lastName'.trim();
+  bool get canAuthenticate =>
+      status == 'active' &&
+      active &&
+      accountNonExpired &&
+      accountNonLocked &&
+      credentialsNonExpired;
+
   AppUser({
     String? id,
     required this.name,
+    String? username,
     required this.email,
+    this.password = '123456',
+    String? firstName,
+    String? lastName,
     this.role = 'employee',
     this.status = 'active',
+    this.active = true,
+    this.accountNonExpired = true,
+    this.accountNonLocked = true,
+    this.credentialsNonExpired = true,
     DateTime? createdAt,
     this.lastLogin,
     Color? avatarColor,
   })  : id = id ?? _uuid.v4(),
+        username = username ?? email.split('@').first,
+        firstName = firstName ?? (name.trim().isEmpty ? '' : name.trim().split(' ').first),
+        lastName = lastName ?? (() {
+          final parts = name.trim().split(' ');
+          if (parts.length <= 1) return '';
+          return parts.sublist(1).join(' ');
+        })(),
         createdAt = createdAt ?? DateTime.now(),
         avatarColor = avatarColor ?? _randomColor();
 
@@ -267,14 +298,14 @@ class MockDataGenerator {
   static List<AppUser> generateUsers() {
     final now = DateTime.now();
     return [
-      AppUser(name: 'Admin Principal', email: 'admin@namla.dz', role: 'admin', status: 'active', lastLogin: now.subtract(const Duration(minutes: 5)), avatarColor: const Color(0xFF006D84)),
-      AppUser(name: 'Karim Bensalah', email: 'karim.b@namla.dz', role: 'supervisor', status: 'active', lastLogin: now.subtract(const Duration(hours: 2)), avatarColor: const Color(0xFF4CAF50)),
-      AppUser(name: 'Amina Rachedi', email: 'amina.r@namla.dz', role: 'supervisor', status: 'active', lastLogin: now.subtract(const Duration(hours: 6)), avatarColor: const Color(0xFFE91E63)),
-      AppUser(name: 'Youcef Slimani', email: 'youcef.s@namla.dz', role: 'employee', status: 'active', lastLogin: now.subtract(const Duration(hours: 1)), avatarColor: const Color(0xFF2196F3)),
-      AppUser(name: 'Fatima Zahra', email: 'fatima.z@namla.dz', role: 'employee', status: 'active', lastLogin: now.subtract(const Duration(days: 1)), avatarColor: const Color(0xFF9C27B0)),
-      AppUser(name: 'Mohamed Aissani', email: 'mohamed.a@namla.dz', role: 'employee', status: 'inactive', lastLogin: now.subtract(const Duration(days: 14)), avatarColor: const Color(0xFF795548)),
-      AppUser(name: 'Sara Belkacem', email: 'sara.b@namla.dz', role: 'employee', status: 'active', lastLogin: now.subtract(const Duration(hours: 3)), avatarColor: const Color(0xFFFF9800)),
-      AppUser(name: 'Ali Djeradi', email: 'ali.d@namla.dz', role: 'employee', status: 'suspended', lastLogin: now.subtract(const Duration(days: 30)), avatarColor: const Color(0xFF607D8B)),
+      AppUser(name: 'Admin Principal', firstName: 'Admin', lastName: 'Principal', username: 'admin', email: 'admin@namla.dz', password: 'admin123', role: 'admin', status: 'active', active: true, accountNonExpired: true, accountNonLocked: true, credentialsNonExpired: true, lastLogin: now.subtract(const Duration(minutes: 5)), avatarColor: const Color(0xFF006D84)),
+      AppUser(name: 'Karim Bensalah', firstName: 'Karim', lastName: 'Bensalah', username: 'karim.b', email: 'karim.b@namla.dz', password: 'karim123', role: 'supervisor', status: 'active', lastLogin: now.subtract(const Duration(hours: 2)), avatarColor: const Color(0xFF4CAF50)),
+      AppUser(name: 'Amina Rachedi', firstName: 'Amina', lastName: 'Rachedi', username: 'amina.r', email: 'amina.r@namla.dz', password: 'amina123', role: 'supervisor', status: 'active', lastLogin: now.subtract(const Duration(hours: 6)), avatarColor: const Color(0xFFE91E63)),
+      AppUser(name: 'Youcef Slimani', firstName: 'Youcef', lastName: 'Slimani', username: 'youcef.s', email: 'youcef.s@namla.dz', password: 'youcef123', role: 'employee', status: 'active', lastLogin: now.subtract(const Duration(hours: 1)), avatarColor: const Color(0xFF2196F3)),
+      AppUser(name: 'Fatima Zahra', firstName: 'Fatima', lastName: 'Zahra', username: 'fatima.z', email: 'fatima.z@namla.dz', password: 'fatima123', role: 'employee', status: 'active', lastLogin: now.subtract(const Duration(days: 1)), avatarColor: const Color(0xFF9C27B0)),
+      AppUser(name: 'Mohamed Aissani', firstName: 'Mohamed', lastName: 'Aissani', username: 'mohamed.a', email: 'mohamed.a@namla.dz', password: 'mohamed123', role: 'employee', status: 'inactive', active: false, lastLogin: now.subtract(const Duration(days: 14)), avatarColor: const Color(0xFF795548)),
+      AppUser(name: 'Sara Belkacem', firstName: 'Sara', lastName: 'Belkacem', username: 'sara.b', email: 'sara.b@namla.dz', password: 'sara123', role: 'employee', status: 'active', lastLogin: now.subtract(const Duration(hours: 3)), avatarColor: const Color(0xFFFF9800)),
+      AppUser(name: 'Ali Djeradi', firstName: 'Ali', lastName: 'Djeradi', username: 'ali.d', email: 'ali.d@namla.dz', password: 'ali123', role: 'employee', status: 'suspended', accountNonLocked: false, lastLogin: now.subtract(const Duration(days: 30)), avatarColor: const Color(0xFF607D8B)),
     ];
   }
 
@@ -374,5 +405,21 @@ class MockDataGenerator {
       'aiAccuracy': 91.2,
       'systemHealth': 98.5,
     };
+  }
+}
+
+class MockAuthService {
+  static final List<AppUser> users = MockDataGenerator.generateUsers();
+
+  static AppUser? authenticate(String identifier, String password) {
+    final input = identifier.trim().toLowerCase();
+    for (final u in users) {
+      final emailMatch = u.email.toLowerCase() == input;
+      final usernameMatch = u.username.toLowerCase() == input;
+      if ((emailMatch || usernameMatch) && u.password == password) {
+        return u;
+      }
+    }
+    return null;
   }
 }

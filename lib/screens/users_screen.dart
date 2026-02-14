@@ -15,7 +15,7 @@ class _UsersScreenState extends State<UsersScreen> {
   @override
   void initState() {
     super.initState();
-    _users = MockDataGenerator.generateUsers();
+    _users = MockAuthService.users;
   }
 
   List<AppUser> get _filtered {
@@ -23,7 +23,9 @@ class _UsersScreenState extends State<UsersScreen> {
       if (_roleFilter != 'all' && u.role != _roleFilter) return false;
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
-        return u.name.toLowerCase().contains(q) || u.email.toLowerCase().contains(q);
+        return u.name.toLowerCase().contains(q) ||
+            u.email.toLowerCase().contains(q) ||
+            u.username.toLowerCase().contains(q);
       }
       return true;
     }).toList();
@@ -131,6 +133,7 @@ class _UsersScreenState extends State<UsersScreen> {
                   dataTextStyle: const TextStyle(fontSize: 13, color: AppColors.textDark),
                   columns: const [
                     DataColumn(label: Text('User')),
+                    DataColumn(label: Text('Username')),
                     DataColumn(label: Text('Email')),
                     DataColumn(label: Text('Role')),
                     DataColumn(label: Text('Status')),
@@ -143,6 +146,7 @@ class _UsersScreenState extends State<UsersScreen> {
                       const SizedBox(width: 10),
                       Text(u.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                     ])),
+                    DataCell(Text(u.username)),
                     DataCell(Text(u.email)),
                     DataCell(_roleBadge(u.role)),
                     DataCell(_statusBadge(u.status)),
@@ -191,10 +195,16 @@ class _UsersScreenState extends State<UsersScreen> {
   // ═══════════════════ CREATE / EDIT DIALOG ═══════════════════
 
   void _showUserDialog(AppUser? existing) {
-    final nameCtrl = TextEditingController(text: existing?.name ?? '');
+    final firstNameCtrl = TextEditingController(text: existing?.firstName ?? '');
+    final lastNameCtrl = TextEditingController(text: existing?.lastName ?? '');
+    final usernameCtrl = TextEditingController(text: existing?.username ?? '');
     final emailCtrl = TextEditingController(text: existing?.email ?? '');
+    final passwordCtrl = TextEditingController(text: existing?.password ?? '');
     String role = existing?.role ?? 'employee';
-    String status = existing?.status ?? 'active';
+    bool active = existing?.active ?? true;
+    bool accountNonExpired = existing?.accountNonExpired ?? true;
+    bool accountNonLocked = existing?.accountNonLocked ?? true;
+    bool credentialsNonExpired = existing?.credentialsNonExpired ?? true;
 
     showDialog(
       context: context,
@@ -211,9 +221,19 @@ class _UsersScreenState extends State<UsersScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person_outline))),
+                Row(
+                  children: [
+                    Expanded(child: TextField(controller: firstNameCtrl, decoration: const InputDecoration(labelText: 'First Name', prefixIcon: Icon(Icons.person_outline)))),
+                    const SizedBox(width: 10),
+                    Expanded(child: TextField(controller: lastNameCtrl, decoration: const InputDecoration(labelText: 'Last Name'))),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextField(controller: usernameCtrl, decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.alternate_email_outlined))),
                 const SizedBox(height: 12),
                 TextField(controller: emailCtrl, decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined))),
+                const SizedBox(height: 12),
+                TextField(controller: passwordCtrl, decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline))),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: role,
@@ -226,15 +246,29 @@ class _UsersScreenState extends State<UsersScreen> {
                   onChanged: (v) => setDialogState(() => role = v!),
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: status,
-                  decoration: const InputDecoration(labelText: 'Status', prefixIcon: Icon(Icons.toggle_on_outlined)),
-                  items: const [
-                    DropdownMenuItem(value: 'active', child: Text('Active')),
-                    DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
-                    DropdownMenuItem(value: 'suspended', child: Text('Suspended')),
-                  ],
-                  onChanged: (v) => setDialogState(() => status = v!),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Active'),
+                  value: active,
+                  onChanged: (v) => setDialogState(() => active = v),
+                ),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Account Non Expired'),
+                  value: accountNonExpired,
+                  onChanged: (v) => setDialogState(() => accountNonExpired = v),
+                ),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Account Non Locked'),
+                  value: accountNonLocked,
+                  onChanged: (v) => setDialogState(() => accountNonLocked = v),
+                ),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Credentials Non Expired'),
+                  value: credentialsNonExpired,
+                  onChanged: (v) => setDialogState(() => credentialsNonExpired = v),
                 ),
               ],
             ),
@@ -243,14 +277,41 @@ class _UsersScreenState extends State<UsersScreen> {
             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
             FilledButton(
               onPressed: () {
-                if (nameCtrl.text.isEmpty || emailCtrl.text.isEmpty) return;
+                if (firstNameCtrl.text.isEmpty || usernameCtrl.text.isEmpty || emailCtrl.text.isEmpty || passwordCtrl.text.isEmpty) return;
+
+                final fullName = '${firstNameCtrl.text.trim()} ${lastNameCtrl.text.trim()}'.trim();
+                final status = !active ? 'inactive' : (!accountNonLocked ? 'suspended' : 'active');
+
                 if (existing != null) {
-                  existing.name = nameCtrl.text;
+                  existing.firstName = firstNameCtrl.text.trim();
+                  existing.lastName = lastNameCtrl.text.trim();
+                  existing.name = fullName;
+                  existing.username = usernameCtrl.text.trim();
                   existing.email = emailCtrl.text;
+                  existing.password = passwordCtrl.text;
                   existing.role = role;
                   existing.status = status;
+                  existing.active = active;
+                  existing.accountNonExpired = accountNonExpired;
+                  existing.accountNonLocked = accountNonLocked;
+                  existing.credentialsNonExpired = credentialsNonExpired;
                 } else {
-                  _users.add(AppUser(name: nameCtrl.text, email: emailCtrl.text, role: role, status: status));
+                  _users.add(
+                    AppUser(
+                      name: fullName,
+                      firstName: firstNameCtrl.text.trim(),
+                      lastName: lastNameCtrl.text.trim(),
+                      username: usernameCtrl.text.trim(),
+                      email: emailCtrl.text.trim(),
+                      password: passwordCtrl.text,
+                      role: role,
+                      status: status,
+                      active: active,
+                      accountNonExpired: accountNonExpired,
+                      accountNonLocked: accountNonLocked,
+                      credentialsNonExpired: credentialsNonExpired,
+                    ),
+                  );
                 }
                 Navigator.pop(ctx);
                 setState(() {});
