@@ -1,0 +1,655 @@
+\documentclass[a4paper,11pt]{article}
+
+% ---- Packages ----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{hyperref}
+\usepackage{pdflscape}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{titlesec}
+
+% ---- Colors ----
+\definecolor{headerblue}{RGB}{41, 98, 255}
+\definecolor{rowgray}{RGB}{240, 240, 245}
+\definecolor{titleblue}{RGB}{25, 60, 150}
+\definecolor{sectionblue}{RGB}{30, 80, 180}
+
+% ---- Header / Footer ----
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{titleblue}{\textbf{WMS Hackathon -- DataPack}}}
+\fancyhead[R]{\small\textcolor{gray}{Page \thepage}}
+\fancyfoot[C]{\small\textcolor{gray}{WMS Hackathon DataPack -- B7 ONLY}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% ---- Section styling ----
+\titleformat{\section}{\Large\bfseries\color{sectionblue}}{}{0em}{}[\vspace{-0.5em}\textcolor{sectionblue}{\rule{\textwidth}{0.8pt}}]
+\titleformat{\subsection}{\large\bfseries\color{titleblue}}{}{0em}{}
+
+% ---- Hyperref setup ----
+\hypersetup{
+    colorlinks=true,
+    linkcolor=sectionblue,
+    urlcolor=sectionblue,
+    bookmarks=true,
+    pdfauthor={WMS Hackathon},
+    pdftitle={WMS Hackathon DataPack - FR - B7 ONLY},
+}
+
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+\setlength{\tabcolsep}{4pt}
+
+\begin{document}
+
+% ---- Title page ----
+\begin{titlepage}
+\centering
+\vspace*{3cm}
+{\Huge\bfseries\textcolor{titleblue}{WMS Hackathon}\par}
+\vspace{0.8cm}
+{\LARGE\textcolor{sectionblue}{DataPack Templates}\par}
+\vspace{0.5cm}
+{\Large FR -- FV -- B7 ONLY\par}
+\vspace{2cm}
+\textcolor{sectionblue}{\rule{0.6\textwidth}{1.5pt}}
+\vspace{1.5cm}
+
+{\large\textbf{Contenu :}\par}
+\vspace{0.5cm}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item[\textcolor{sectionblue}{$\bullet$}] Instructions (Lisez-moi)
+    \item[\textcolor{sectionblue}{$\bullet$}] Dictionnaire des données
+    \item[\textcolor{sectionblue}{$\bullet$}] 11 tables de données (aperçu pour les grandes tables)
+    \item[\textcolor{sectionblue}{$\bullet$}] Mapping EN $\leftrightarrow$ FR
+\end{itemize}
+\vfill
+{\small\textcolor{gray}{Généré le \today}\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+
+\section{Lisez-moi (Instructions)}
+
+\begin{itemize}
+    \item Chaque onglet correspond à un modèle de fichier CSV.
+    \item \textbf{Ligne 1} = en-têtes de colonnes. \textbf{Ligne 2} = types. \textbf{Ligne 3} = obligatoire (O/N). \textbf{Ligne 4+} = données.
+    \item Les équipes peuvent ajouter des colonnes, mais ne doivent \textbf{PAS} renommer ni supprimer les colonnes de base.
+    \item Les identifiants (ID) peuvent être des entiers ou des UUID; ils doivent correspondre entre les tables (clés étrangères).
+    \item Si vous n'avez pas de commandes d'achat ouvertes ou de délais, vous pouvez laisser les tables optionnelles vides et utiliser des valeurs par défaut.
+    \item Utilisez les formats ISO : date = \texttt{YYYY-MM-DD}, date/heure = \texttt{YYYY-MM-DD HH:MM:SS}.
+\end{itemize}
+
+\newpage
+
+\section{Dictionnaire des données}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{Table} & \textbf{Colonne} & \textbf{Type} & \textbf{Obligatoire} & \textbf{Description} & \textbf{Exemple} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{Table} & \textbf{Colonne} & \textbf{Type} & \textbf{Obligatoire} & \textbf{Description} & \textbf{Exemple} \\ \hline
+\endhead
+\hline \multicolumn{6}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ produits & id\_produit & texte & O & Identifiant unique du produit (UUID ou entier). & P001 \\ \hline
+\rowcolor{rowgray} produits & sku & texte & O & Référence/SKU lisible utilisée dans les opérations. & ABC-001 \\ \hline
+ produits & nom\_produit & texte & O & Nom/description du produit. & Mixer Tap 1/2" \\ \hline
+\rowcolor{rowgray} produits & unite\_mesure & texte & O & Unité de mesure (pcs, kg, m). & pcs \\ \hline
+ produits & categorie & texte & N & Catégorie ou famille (optionnel). & Fittings \\ \hline
+\rowcolor{rowgray} produits & actif & booleen & O & Indique si la référence est active (TRUE/FALSE). & TRUE \\ \hline
+ codes\_barres\_produits & code\_barres & texte & O & Chaîne de code-barres scannable (EAN/Code128/QR). & 6291234567890 \\ \hline
+\rowcolor{rowgray} codes\_barres\_produits & id\_produit & texte & O & Clé étrangère vers produits.id\_produit. & P001 \\ \hline
+ codes\_barres\_produits & type\_code\_barres & texte & O & EAN13 | CODE128 | QR & EAN13 \\ \hline
+\rowcolor{rowgray} codes\_barres\_produits & principal & booleen & N & Code-barres principal pour la référence (TRUE/FALSE). & TRUE \\ \hline
+ entrepots & id\_entrepot & texte & O & Identifiant unique de l'entrepôt. & W1 \\ \hline
+\rowcolor{rowgray} entrepots & code\_entrepot & texte & O & Code court affiché dans l'UI et les codes d'emplacement. & WH1 \\ \hline
+ entrepots & nom\_entrepot & texte & O & Nom de l'entrepôt. & Central Finished Goods \\ \hline
+\rowcolor{rowgray} entrepots & ville & texte & N & Ville (optionnel). & Algiers \\ \hline
+ entrepots & actif & booleen & O & Entrepôt actif (TRUE/FALSE). & TRUE \\ \hline
+\rowcolor{rowgray} emplacements & id\_emplacement & texte & O & Identifiant unique de l'emplacement (bin). & L1001 \\ \hline
+ emplacements & code\_emplacement & texte & O & Code d'emplacement (souvent imprimé en étiquette/QR). & WH1-Z01-A02-B05 \\ \hline
+\rowcolor{rowgray} emplacements & id\_entrepot & texte & O & Clé étrangère vers entrepots.id\_entrepot. & W1 \\ \hline
+ emplacements & zone & texte & N & Zone (optionnel), ex: RECEPTION, STOCKAGE, PICK. & Z01 \\ \hline
+\rowcolor{rowgray} emplacements & type\_emplacement & texte & O & RECEIVING | STORAGE | PICK | QC | DAMAGED & STORAGE \\ \hline
+ emplacements & actif & booleen & O & Emplacement actif (TRUE/FALSE). & TRUE \\ \hline
+\rowcolor{rowgray} utilisateurs & id\_utilisateur & texte & O & Identifiant unique de l'utilisateur. & U001 \\ \hline
+ utilisateurs & nom\_complet & texte & O & Nom complet affiché dans l'application. & A. Operator \\ \hline
+\rowcolor{rowgray} utilisateurs & role & texte & O & OPERATOR | SUPERVISOR | PLANNER | ADMIN & OPERATOR \\ \hline
+ utilisateurs & email & texte & N & Email (optionnel). & operator@example.com \\ \hline
+\rowcolor{rowgray} utilisateurs & actif & booleen & O & Utilisateur actif (TRUE/FALSE). & TRUE \\ \hline
+ transactions & id\_transaction & texte & O & Identifiant unique de la transaction. & T0001 \\ \hline
+\rowcolor{rowgray} transactions & type\_transaction & texte & O & RECEIPT | MOVE | PICK | ADJUSTMENT & RECEIPT \\ \hline
+ transactions & reference\_transaction & texte & O & Référence lisible (ex: RCV-2026-0001). & RCV-2026-0001 \\ \hline
+\rowcolor{rowgray} transactions & cree\_le & datetime & O & Date/heure de création (YYYY-MM-DD HH:MM:SS). & 2026-02-03 09:15:00 \\ \hline
+ transactions & cree\_par\_id\_utilisateur & texte & O & Clé étrangère vers utilisateurs.id\_utilisateur. & U001 \\ \hline
+\rowcolor{rowgray} transactions & statut & texte & O & DRAFT | CONFIRMED | CANCELLED & CONFIRMED \\ \hline
+ transactions & notes & texte & N & Notes (optionnel). & Inbound from supplier X \\ \hline
+\rowcolor{rowgray} lignes\_transaction & id\_transaction & texte & O & Clé étrangère vers transactions.id\_transaction. & T0001 \\ \hline
+ lignes\_transaction & no\_ligne & entier & O & Numéro de ligne (1,2,3...). & 1 \\ \hline
+\rowcolor{rowgray} lignes\_transaction & id\_produit & texte & O & Clé étrangère vers produits.id\_produit. & P001 \\ \hline
+ lignes\_transaction & quantite & nombre & O & Quantité (positive). & 10 \\ \hline
+\rowcolor{rowgray} lignes\_transaction & id\_emplacement\_source & texte & N & Emplacement source (optionnel selon type). & L1001 \\ \hline
+ lignes\_transaction & id\_emplacement\_destination & texte & N & Emplacement destination (optionnel selon type). & L2001 \\ \hline
+\rowcolor{rowgray} lignes\_transaction & lot\_serie & texte & N & Lot/série (optionnel) pour traçabilité. & BATCH-24A \\ \hline
+ lignes\_transaction & code\_motif & texte & N & Code motif (optionnel) ex: COUNT, DAMAGED, EXPIRY. & COUNT \\ \hline
+\rowcolor{rowgray} historique\_demande & date & date & O & Date (YYYY-MM-DD). & 2026-01-15 \\ \hline
+ historique\_demande & id\_produit & texte & O & Clé étrangère vers produits.id\_produit. & P001 \\ \hline
+\rowcolor{rowgray} historique\_demande & quantite\_demande & nombre & O & Demande/consommation sur la période. & 4 \\ \hline
+ delais\_approvisionnement & id\_produit & texte & O & Clé étrangère vers produits.id\_produit. & P001 \\ \hline
+\rowcolor{rowgray} delais\_approvisionnement & delai\_jours & entier & O & Délai d'approvisionnement en jours (entier). & 14 \\ \hline
+ politique\_reapprovisionnement & id\_produit & texte & O & Clé étrangère vers produits.id\_produit. & P001 \\ \hline
+\rowcolor{rowgray} politique\_reapprovisionnement & stock\_securite & nombre & N & Stock de sécurité (optionnel). & 10 \\ \hline
+ politique\_reapprovisionnement & quantite\_min\_commande & nombre & N & Quantité minimale de commande (optionnel). & 20 \\ \hline
+\rowcolor{rowgray} politique\_reapprovisionnement & taille\_lot & nombre & N & Taille de lot (arrondi) (optionnel). & 5 \\ \hline
+ cmd\_achat\_ouvertes\_opt & id\_commande\_achat & texte & O & Identifiant de la commande d'achat (PO). & PO-0001 \\ \hline
+\rowcolor{rowgray} cmd\_achat\_ouvertes\_opt & id\_produit & texte & O & Clé étrangère vers produits.id\_produit. & P001 \\ \hline
+ cmd\_achat\_ouvertes\_opt & quantite\_commandee & nombre & O & Quantité commandée. & 100 \\ \hline
+\rowcolor{rowgray} cmd\_achat\_ouvertes\_opt & date\_reception\_prevue & date & O & Date de réception prévue (YYYY-MM-DD). & 2026-02-20 \\ \hline
+ cmd\_achat\_ouvertes\_opt & statut & texte & O & OPEN | RECEIVED | CANCELLED & OPEN \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\section{Tables de données}
+
+
+\subsection{Produits}
+
+\textit{Fichier : \texttt{produits.csv} -- 1583 lignes totales
+ (aperçu : 15 premières lignes)
+}
+
+
+\begin{landscape}
+\tiny
+\begin{longtable}{|l|l|l|l|l|l|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_produit} & \textbf{sku} & \textbf{nom\_produit} & \textbf{unite\_mesure} & \textbf{categorie} & \textbf{actif} & \textbf{colisage fardeau} & \textbf{colisage palette} & \textbf{volume pcs (m3)} & \textbf{Poids(kg)} & \textbf{Is\_Gerbable} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_produit} & \textbf{sku} & \textbf{nom\_produit} & \textbf{unite\_mesure} & \textbf{categorie} & \textbf{actif} & \textbf{colisage fardeau} & \textbf{colisage palette} & \textbf{volume pcs (m3)} & \textbf{Poids(kg)} & \textbf{Is\_Gerbable} \\ \hline
+\endhead
+\hline \multicolumn{11}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ 31334 & f2ee815bef75b7fecadf & 14c03f68f1b77ab81c155e147dc6309129a85c9564d2b35d73103d11c26ec301 & Unité(s) & MOULURE & True & 32 & 1600 & 0.0002 & 0 & True \\ \hline
+\rowcolor{rowgray} 31335 & fd874c7598d3465d97b4 & afa26d113685cc9928ba6f6e5c2b44d8ebbf53226accb8c4a460feb2692b02e4 & Unité(s) & MOULURE & True & 32 & 2100 & 0.00025 & 0 & True \\ \hline
+ 31336 & a2dc16d4ff33ef593b3f & 291e260b8fbb3204acba996d71e7e29afb54bb2a4dfdb17e94be82faf6fb580f & Unité(s) & MOULURE & True & 32 & 2300 & 0.00025 & 0 & True \\ \hline
+\rowcolor{rowgray} 31337 & 524cab6bfc1f966aeb3e & 1926ae55c99ec2c2cc3fb751b48517aae8d5de22e51887b75650d375d9fc4d0c & Unité(s) & MOULURE & True & 20 & 1000 & 0.00025 & 0 & True \\ \hline
+ 31338 & d33bc218f63cf9c37d19 & cd63aede5a3725c7ac7511226962b0b9278c0c5373422f77b92b653c3fd6c95c & Unité(s) & MOULURE & True & 60 & 1300 & 0.000125 & 0 & True \\ \hline
+\rowcolor{rowgray} 31339 & fb4905b05461b9035937 & 30b55243d1fac46593689dba90b78e3089181c8ec8a11efcb796d61c0027632e & Unité(s) & MOULURE & True & 22 & 2500 & 0.00025 & 0 & True \\ \hline
+ 31340 & 228ab5bc78ceb2d1edbe & 5233bfffa7f02db2e67d3f7b2f64ddee39af7fa31bdc73d8af529302b2ef585b & Unité(s) & MOULURE & True & 1 & 1000 & 0.00025 & 0 & True \\ \hline
+\rowcolor{rowgray} 31341 & 675f51e7e0697591e82d & 4b31eab1644ce62fbce0d6183c4cb8ab767c238d97b3639376ecbc1b213c9984 & Unité(s) & MOULURE & True & 12 & 1500 & 0.00025 & 0 & True \\ \hline
+ 31342 & edb99ea11d85442f02b7 & 84999f82ca1f0b1e50557fb0928e6aee336896af831eb9b1b168fb725d2dc09f & Unité(s) & MOULURE & True & 32 & 1900 & 0.00025 & 0 & True \\ \hline
+\rowcolor{rowgray} 31343 & a63c2eb107946b434381 & 64ddd4ba1ce31cc364345640a16b5645e241a8f51d747730eb454bb8a44849be & Unité(s) & MOULURE & True & 24 & 1400 & 0.00025 & 0 & True \\ \hline
+ 31344 & 123950eed243f31c9835 & 96a55827f8b025d555c0018bfc7dec4a274cb55567780988950606b504f24ddf & Unité(s) & MOULURE & True & 96 & 3000 & 5e-06 & 0 & True \\ \hline
+\rowcolor{rowgray} 31347 & 962b9a9a1afd153faeb7 & 105bf8be77fbe324568d13c848d59a2d1c0435bfdf7d98f2fbd0c91ce23f8d1e & Unité(s) & MOULURE & True & 100 & 1500 & 1.28e-05 & 0 & True \\ \hline
+ 31348 & 79bff1e0f63a791b8fec & b9d66b88d527f841fef1ebdf6b2c38d6ff380ba4d260bda1320519f217280a9b & Unité(s) & MOULURE & True & 100 & 1700 & 1.28e-05 & 0 & True \\ \hline
+\rowcolor{rowgray} 31349 & dfb63a0401dd9cf6adae & 3dad4b3e9d8307044a32485785914fcf9004c79304d6f7ca4892fd0464152a5f & Unité(s) & MOULURE & True & 200 & 2800 & 1.28e-05 & 0 & True \\ \hline
+ 31350 & 901980be15f40227ecba & b7e465638ba229db8bbd00f74a570b3880a18e2048793af413e4638a8a9c8b83 & Unité(s) & MOULURE & True & 200 & 2400 & 1.28e-05 & 0 & True \\ \hline
+\multicolumn{11}{|c|}{\textit{... données tronquées (aperçu uniquement) ...}} \\ \hline
+\end{longtable}
+\end{landscape}
+\normalsize
+
+\newpage
+
+\subsection{Codes-barres produits}
+
+\textit{Fichier : \texttt{codes\_barres\_produits.csv} -- 1583 lignes totales
+ (aperçu : 15 premières lignes)
+}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{code\_barres} & \textbf{id\_produit} & \textbf{type\_code\_barres} & \textbf{principal} & \textbf{code barre fardeau} & \textbf{code barre palette} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{code\_barres} & \textbf{id\_produit} & \textbf{type\_code\_barres} & \textbf{principal} & \textbf{code barre fardeau} & \textbf{code barre palette} \\ \hline
+\endhead
+\hline \multicolumn{6}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ 6199447549400 & 31334 & EAN13 & TRUE & 6190638791703 & 6196099057532 \\ \hline
+\rowcolor{rowgray} 6195119866486 & 31335 & EAN13 & TRUE & 6195961099292 & 6198762632608 \\ \hline
+ 6197235346914 & 31336 & EAN13 & TRUE & 6194812451841 & 6197227779117 \\ \hline
+\rowcolor{rowgray} 6197573430492 & 31337 & EAN13 & TRUE & 6196535906879 & 6190324483967 \\ \hline
+ 6195899765258 & 31338 & EAN13 & TRUE & 6197745623181 & 6199270024729 \\ \hline
+\rowcolor{rowgray} 6194296644245 & 31339 & EAN13 & TRUE & 6190152522469 & 6195513507525 \\ \hline
+ 6193436232856 & 31340 & EAN13 & TRUE & 6196546690770 & 6198915997851 \\ \hline
+\rowcolor{rowgray} 6191180104982 & 31341 & EAN13 & TRUE & 6198973268254 & 6192395593156 \\ \hline
+ 6191096944074 & 31342 & EAN13 & TRUE & 6195454971850 & 6193590591013 \\ \hline
+\rowcolor{rowgray} 6193661186845 & 31343 & EAN13 & TRUE & 6192586917394 & 6196629801765 \\ \hline
+ 6199259717462 & 31344 & EAN13 & TRUE & 6195784534514 & 6190519115400 \\ \hline
+\rowcolor{rowgray} 6195271182893 & 31347 & EAN13 & TRUE & 6191588259259 & 6195891939848 \\ \hline
+ 6190282754488 & 31348 & EAN13 & TRUE & 6192409612853 & 6194160043103 \\ \hline
+\rowcolor{rowgray} 6192145486802 & 31349 & EAN13 & TRUE & 6190799212505 & 6197723876879 \\ \hline
+ 6198945683511 & 31350 & EAN13 & TRUE & 6192298370586 & 6199466433784 \\ \hline
+\multicolumn{6}{|c|}{\textit{... données tronquées (aperçu uniquement) ...}} \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\subsection{Entrepôts}
+
+\textit{Fichier : \texttt{entrepots.csv} -- 23 lignes totales
+}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_entrepot} & \textbf{code\_entrepot} & \textbf{nom\_entrepot} & \textbf{ville} & \textbf{actif} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_entrepot} & \textbf{code\_entrepot} & \textbf{nom\_entrepot} & \textbf{ville} & \textbf{actif} \\ \hline
+\endhead
+\hline \multicolumn{5}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ 235 & PF & DEPOT BBH PRODUIT FINI MONO & Algiers & TRUE \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\subsection{Emplacements}
+
+\textit{Fichier : \texttt{emplacements.csv} -- 840 lignes totales
+ (aperçu : 20 premières lignes)
+}
+
+
+\begin{landscape}
+\tiny
+\begin{longtable}{|l|l|l|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_emplacement} & \textbf{code\_emplacement} & \textbf{id\_entrepot} & \textbf{zone} & \textbf{type\_emplacement} & \textbf{actif} & \textbf{Volume (m3)} & \textbf{} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_emplacement} & \textbf{code\_emplacement} & \textbf{id\_entrepot} & \textbf{zone} & \textbf{type\_emplacement} & \textbf{actif} & \textbf{Volume (m3)} & \textbf{} \\ \hline
+\endhead
+\hline \multicolumn{8}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ 426 & 0A-01-03 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 430 & 0A-02-01 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 434 & 0A-02-02 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 438 & 0A-02-03 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 442 & 0B-01-01 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 446 & 0B-01-02 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 450 & 0B-01-03 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 454 & 0B-02-01 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 458 & 0B-02-02 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 462 & 0B-02-03 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 466 & 0B-03-01 & 235 & B7-PCK & PICKING & True & ùù & ²312 \\ \hline
+\rowcolor{rowgray} 470 & 0B-03-02 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 474 & 0B-03-03 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 478 & 0C-01-01 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 482 & 0C-01-02 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 486 & 0C-01-03 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 680 & 0C-02-01 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 684 & 0C-02-02 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+ 688 & 0C-02-03 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\rowcolor{rowgray} 692 & 0D-01-01 & 235 & B7-PCK & PICKING & True &  &  \\ \hline
+\multicolumn{8}{|c|}{\textit{... données tronquées (aperçu uniquement) ...}} \\ \hline
+\end{longtable}
+\end{landscape}
+\normalsize
+
+\newpage
+
+\subsection{Utilisateurs}
+
+\textit{Fichier : \texttt{utilisateurs.csv} -- 23 lignes totales
+}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_utilisateur} & \textbf{nom\_complet} & \textbf{role} & \textbf{email} & \textbf{actif} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_utilisateur} & \textbf{nom\_complet} & \textbf{role} & \textbf{email} & \textbf{actif} \\ \hline
+\endhead
+\hline \multicolumn{5}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ U001 & A. Operator & OPERATOR & operator@example.com & TRUE \\ \hline
+\rowcolor{rowgray}  &  & responsable magasin &  &  \\ \hline
+  &  & preparateur de commade &  &  \\ \hline
+\rowcolor{rowgray}  &  & controleur &  &  \\ \hline
+  &  & reciptioniste &  &  \\ \hline
+\rowcolor{rowgray}  &  & responsable logistique &  &  \\ \hline
+  &  & Preparateur VRAC &  &  \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\subsection{Transactions}
+
+\textit{Fichier : \texttt{transactions.csv} -- 4271 lignes totales
+ (aperçu : 15 premières lignes)
+}
+
+
+\begin{landscape}
+\scriptsize
+\begin{longtable}{|l|l|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_transaction} & \textbf{type\_transaction} & \textbf{reference\_transaction} & \textbf{cree\_le} & \textbf{cree\_par\_id\_utilisateur} & \textbf{statut} & \textbf{notes} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_transaction} & \textbf{type\_transaction} & \textbf{reference\_transaction} & \textbf{cree\_le} & \textbf{cree\_par\_id\_utilisateur} & \textbf{statut} & \textbf{notes} \\ \hline
+\endhead
+\hline \multicolumn{7}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ T0001 & RECEIPT & RCV-2026-0001 & 2026-02-03 09:15:00 & U001 & CONFIRMED & Inbound from supplier X \\ \hline
+\rowcolor{rowgray} BL/ME25/03449 & DELIVERY & BL/ME25/03449 & 2025-03-12 00:00:00 & U001 & CONFIRMED & Outbound to customer id ME005 \\ \hline
+ BL/ME25/03441 & DELIVERY & BL/ME25/03441 & 2025-03-12 00:00:00 & U001 & CONFIRMED & Outbound to customer id MC008 \\ \hline
+\rowcolor{rowgray} BL/ME25/03463 & DELIVERY & BL/ME25/03463 & 2025-03-12 00:00:00 & U001 & CONFIRMED & Outbound to customer id MK002 \\ \hline
+ BL/ME25/03446 & DELIVERY & BL/ME25/03446 & 2025-03-12 00:00:00 & U001 & CONFIRMED & Outbound to customer id ME056 \\ \hline
+\rowcolor{rowgray} BL/ME25/03516 & DELIVERY & BL/ME25/03516 & 2025-03-13 00:00:00 & U001 & CONFIRMED & Outbound to customer id MCH122 \\ \hline
+ BL/ME25/03448 & DELIVERY & BL/ME25/03448 & 2025-03-12 00:00:00 & U001 & CONFIRMED & Outbound to customer id ME049 \\ \hline
+\rowcolor{rowgray} BL/ME25/03437 & DELIVERY & BL/ME25/03437 & 2025-03-12 00:00:00 & U001 & CONFIRMED & Outbound to customer id MC065 \\ \hline
+ BL/ME25/03438 & DELIVERY & BL/ME25/03438 & 2025-03-12 00:00:00 & U001 & CONFIRMED & Outbound to customer id MC001 \\ \hline
+\rowcolor{rowgray} BL/ME25/03649 & DELIVERY & BL/ME25/03649 & 2025-03-17 00:00:00 & U001 & CONFIRMED & Outbound to customer id MC008 \\ \hline
+ BL/ME25/01 & DELIVERY & BL/ME25/01 & 2025-03-17 00:00:00 & U001 & CONFIRMED & Outbound to customer id MC008 \\ \hline
+\rowcolor{rowgray} BL/ME25/03653 & DELIVERY & BL/ME25/03653 & 2025-03-17 00:00:00 & U001 & CONFIRMED & Outbound to customer id MCH736 \\ \hline
+ BL/ME25/03697 & DELIVERY & BL/ME25/03697 & 2025-03-17 00:00:00 & U001 & CONFIRMED & Outbound to customer id MC011 \\ \hline
+\rowcolor{rowgray} BL/ME25/03703 & DELIVERY & BL/ME25/03703 & 2025-03-18 00:00:00 & U001 & CONFIRMED & Outbound to customer id MC115 \\ \hline
+ BL/ME25/03572 & DELIVERY & BL/ME25/03572 & 2025-03-15 00:00:00 & U001 & CONFIRMED & Outbound to customer id MS045 \\ \hline
+\multicolumn{7}{|c|}{\textit{... données tronquées (aperçu uniquement) ...}} \\ \hline
+\end{longtable}
+\end{landscape}
+\normalsize
+
+\newpage
+
+\subsection{Lignes de transaction}
+
+\textit{Fichier : \texttt{lignes\_transaction.csv} -- 76890 lignes totales
+ (aperçu : 15 premières lignes)
+}
+
+
+\begin{landscape}
+\tiny
+\begin{longtable}{|l|l|l|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_transaction} & \textbf{no\_ligne} & \textbf{id\_produit} & \textbf{quantite} & \textbf{id\_emplacement\_source} & \textbf{id\_emplacement\_destination} & \textbf{lot\_serie} & \textbf{code\_motif} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_transaction} & \textbf{no\_ligne} & \textbf{id\_produit} & \textbf{quantite} & \textbf{id\_emplacement\_source} & \textbf{id\_emplacement\_destination} & \textbf{lot\_serie} & \textbf{code\_motif} \\ \hline
+\endhead
+\hline \multicolumn{8}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ BL/ME25/03449 &  & 31851 & 80 & 54 & COSTUMER LOCATION &  &  \\ \hline
+\rowcolor{rowgray} BL/ME25/03449 &  & 31501 & 120 & 609 & COSTUMER LOCATION &  &  \\ \hline
+ BL/ME25/03449 &  & 31501 & 480 & 610 & COSTUMER LOCATION &  &  \\ \hline
+\rowcolor{rowgray} BL/ME25/03449 &  & 31490 & 160 & 35 & COSTUMER LOCATION &  &  \\ \hline
+ BL/ME25/03449 &  & 31496 & 40 & 39 & COSTUMER LOCATION &  &  \\ \hline
+\rowcolor{rowgray} BL/ME25/03449 &  & 31474 & 100 & 531 & COSTUMER LOCATION &  &  \\ \hline
+ BL/ME25/03441 &  & 32089 & 30 & 366 & COSTUMER LOCATION &  &  \\ \hline
+\rowcolor{rowgray} BL/ME25/03441 &  & 32085 & 30 & 628 & COSTUMER LOCATION &  &  \\ \hline
+ BL/ME25/03441 &  & 32079 & 30 & 628 & COSTUMER LOCATION &  &  \\ \hline
+\rowcolor{rowgray} BL/ME25/03441 &  & 32124 & 90 & 303 & COSTUMER LOCATION &  &  \\ \hline
+ BL/ME25/03441 &  & 32005 & 180 & 652 & COSTUMER LOCATION &  &  \\ \hline
+\rowcolor{rowgray} BL/ME25/03441 &  & 32004 & 80 & 627 & COSTUMER LOCATION &  &  \\ \hline
+ BL/ME25/03441 &  & 32003 & 180 & 627 & COSTUMER LOCATION &  &  \\ \hline
+\rowcolor{rowgray} BL/ME25/03463 &  & 31437 & 600 & 1403 & COSTUMER LOCATION &  &  \\ \hline
+ BL/ME25/03463 &  & 31449 & 600 & 284 & COSTUMER LOCATION &  &  \\ \hline
+\multicolumn{8}{|c|}{\textit{... données tronquées (aperçu uniquement) ...}} \\ \hline
+\end{longtable}
+\end{landscape}
+\normalsize
+
+\newpage
+
+\subsection{Historique de la demande}
+
+\textit{Fichier : \texttt{historique\_demande.csv} -- 151233 lignes totales
+ (aperçu : 20 premières lignes)
+}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{date} & \textbf{id\_produit} & \textbf{quantite\_demande} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{date} & \textbf{id\_produit} & \textbf{quantite\_demande} \\ \hline
+\endhead
+\hline \multicolumn{3}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ 2024-03-09 10:20:17 & 31779 & 4 \\ \hline
+\rowcolor{rowgray} 2024-03-09 10:20:17 & 31775 & 1 \\ \hline
+ 2024-03-09 10:31:09 & 34013 & 7 \\ \hline
+\rowcolor{rowgray} 2024-03-09 10:31:09 & 34014 & 1 \\ \hline
+ 2024-03-09 10:31:09 & 34016 & 4 \\ \hline
+\rowcolor{rowgray} 2024-03-17 11:39:08 & 31960 & 1 \\ \hline
+ 2024-03-17 11:39:08 & 31940 & 1 \\ \hline
+\rowcolor{rowgray} 2024-03-17 11:39:08 & 31953 & 4 \\ \hline
+ 2024-03-17 11:39:08 & 31509 & 6 \\ \hline
+\rowcolor{rowgray} 2024-03-11 11:58:37 & 34637 & 480 \\ \hline
+ 2024-04-21 08:06:34 & 31761 & 150 \\ \hline
+\rowcolor{rowgray} 2024-04-16 13:17:37 & 31737 & 600 \\ \hline
+ 2024-04-16 13:17:37 & 31543 & 200 \\ \hline
+\rowcolor{rowgray} 2024-04-16 13:17:37 & 31732 & 600 \\ \hline
+ 2024-04-16 13:17:37 & 31724 & 300 \\ \hline
+\rowcolor{rowgray} 2024-04-16 13:17:37 & 31725 & 300 \\ \hline
+ 2024-04-16 13:17:37 & 31729 & 300 \\ \hline
+\rowcolor{rowgray} 2024-04-16 13:42:38 & 31731 & 200 \\ \hline
+ 2024-04-16 13:42:38 & 36520 & 300 \\ \hline
+\rowcolor{rowgray} 2024-04-16 13:42:38 & 31549 & 400 \\ \hline
+\multicolumn{3}{|c|}{\textit{... données tronquées (aperçu uniquement) ...}} \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\subsection{Délais d'approvisionnement}
+
+\textit{Fichier : \texttt{delais\_approvisionnement.csv} -- 23 lignes totales
+}
+
+
+\scriptsize
+\begin{longtable}{|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_produit} & \textbf{delai\_jours} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_produit} & \textbf{delai\_jours} \\ \hline
+\endhead
+\hline \multicolumn{2}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ P001 & 14 \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\subsection{Politique de réapprovisionnement}
+
+\textit{Fichier : \texttt{politique\_reapprovisionnement.csv} -- 23 lignes totales
+}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_produit} & \textbf{stock\_securite} & \textbf{quantite\_min\_commande} & \textbf{taille\_lot} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_produit} & \textbf{stock\_securite} & \textbf{quantite\_min\_commande} & \textbf{taille\_lot} \\ \hline
+\endhead
+\hline \multicolumn{4}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ P001 & 10 & 20 & 5 \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\subsection{Commandes d'achat ouvertes (opt.)}
+
+\textit{Fichier : \texttt{cmd\_achat\_ouvertes\_opt.csv} -- 23 lignes totales
+}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{id\_commande\_achat} & \textbf{id\_produit} & \textbf{quantite\_commandee} & \textbf{date\_reception\_prevue} & \textbf{statut} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{id\_commande\_achat} & \textbf{id\_produit} & \textbf{quantite\_commandee} & \textbf{date\_reception\_prevue} & \textbf{statut} \\ \hline
+\endhead
+\hline \multicolumn{5}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ PO-0001 & P001 & 100 & 2026-02-20 & OPEN \\ \hline
+\end{longtable}
+\normalsize
+
+\newpage
+
+\section{Mapping EN $\leftrightarrow$ FR}
+
+
+\scriptsize
+\begin{longtable}{|l|l|l|l|}
+\hline
+\rowcolor{headerblue}
+\textbf{Table\_EN} & \textbf{Colonne\_EN} & \textbf{Table\_FR} & \textbf{Colonne\_FR} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\textbf{Table\_EN} & \textbf{Colonne\_EN} & \textbf{Table\_FR} & \textbf{Colonne\_FR} \\ \hline
+\endhead
+\hline \multicolumn{4}{|r|}{\textit{Suite page suivante...}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+ products & product\_id & produits & id\_produit \\ \hline
+\rowcolor{rowgray} products & sku & produits & sku \\ \hline
+ products & product\_name & produits & nom\_produit \\ \hline
+\rowcolor{rowgray} products & uom & produits & unite\_mesure \\ \hline
+ products & category & produits & categorie \\ \hline
+\rowcolor{rowgray} products & is\_active & produits & actif \\ \hline
+ product\_barcodes & barcode\_value & codes\_barres\_produits & code\_barres \\ \hline
+\rowcolor{rowgray} product\_barcodes & product\_id & codes\_barres\_produits & id\_produit \\ \hline
+ product\_barcodes & barcode\_type & codes\_barres\_produits & type\_code\_barres \\ \hline
+\rowcolor{rowgray} product\_barcodes & is\_primary & codes\_barres\_produits & principal \\ \hline
+ warehouses & warehouse\_id & entrepots & id\_entrepot \\ \hline
+\rowcolor{rowgray} warehouses & warehouse\_code & entrepots & code\_entrepot \\ \hline
+ warehouses & warehouse\_name & entrepots & nom\_entrepot \\ \hline
+\rowcolor{rowgray} warehouses & city & entrepots & ville \\ \hline
+ warehouses & is\_active & entrepots & actif \\ \hline
+\rowcolor{rowgray} locations & location\_id & emplacements & id\_emplacement \\ \hline
+ locations & location\_code & emplacements & code\_emplacement \\ \hline
+\rowcolor{rowgray} locations & warehouse\_id & emplacements & id\_entrepot \\ \hline
+ locations & zone & emplacements & zone \\ \hline
+\rowcolor{rowgray} locations & location\_type & emplacements & type\_emplacement \\ \hline
+ locations & is\_active & emplacements & actif \\ \hline
+\rowcolor{rowgray} users & user\_id & utilisateurs & id\_utilisateur \\ \hline
+ users & full\_name & utilisateurs & nom\_complet \\ \hline
+\rowcolor{rowgray} users & role & utilisateurs & role \\ \hline
+ users & email & utilisateurs & email \\ \hline
+\rowcolor{rowgray} users & is\_active & utilisateurs & actif \\ \hline
+ transactions & txn\_id & transactions & id\_transaction \\ \hline
+\rowcolor{rowgray} transactions & txn\_type & transactions & type\_transaction \\ \hline
+ transactions & txn\_ref & transactions & reference\_transaction \\ \hline
+\rowcolor{rowgray} transactions & created\_at & transactions & cree\_le \\ \hline
+ transactions & created\_by\_user\_id & transactions & cree\_par\_id\_utilisateur \\ \hline
+\rowcolor{rowgray} transactions & status & transactions & statut \\ \hline
+ transactions & notes & transactions & notes \\ \hline
+\rowcolor{rowgray} transaction\_lines & txn\_id & lignes\_transaction & id\_transaction \\ \hline
+ transaction\_lines & line\_no & lignes\_transaction & no\_ligne \\ \hline
+\rowcolor{rowgray} transaction\_lines & product\_id & lignes\_transaction & id\_produit \\ \hline
+ transaction\_lines & qty & lignes\_transaction & quantite \\ \hline
+\rowcolor{rowgray} transaction\_lines & from\_location\_id & lignes\_transaction & id\_emplacement\_source \\ \hline
+ transaction\_lines & to\_location\_id & lignes\_transaction & id\_emplacement\_destination \\ \hline
+\rowcolor{rowgray} transaction\_lines & lot\_batch & lignes\_transaction & lot\_serie \\ \hline
+ transaction\_lines & reason\_code & lignes\_transaction & code\_motif \\ \hline
+\rowcolor{rowgray} demand\_history & date & historique\_demande & date \\ \hline
+ demand\_history & product\_id & historique\_demande & id\_produit \\ \hline
+\rowcolor{rowgray} demand\_history & demand\_qty & historique\_demande & quantite\_demande \\ \hline
+ lead\_times & product\_id & delais\_approvisionnement & id\_produit \\ \hline
+\rowcolor{rowgray} lead\_times & lead\_time\_days & delais\_approvisionnement & delai\_jours \\ \hline
+ reorder\_policy & product\_id & politique\_reapprovisionnement & id\_produit \\ \hline
+\rowcolor{rowgray} reorder\_policy & safety\_stock\_qty & politique\_reapprovisionnement & stock\_securite \\ \hline
+ reorder\_policy & min\_order\_qty & politique\_reapprovisionnement & quantite\_min\_commande \\ \hline
+\rowcolor{rowgray} reorder\_policy & pack\_size\_qty & politique\_reapprovisionnement & taille\_lot \\ \hline
+ open\_purchase\_orders\_optional & po\_id & cmd\_achat\_ouvertes\_opt & id\_commande\_achat \\ \hline
+\rowcolor{rowgray} open\_purchase\_orders\_optional & product\_id & cmd\_achat\_ouvertes\_opt & id\_produit \\ \hline
+ open\_purchase\_orders\_optional & qty\_ordered & cmd\_achat\_ouvertes\_opt & quantite\_commandee \\ \hline
+\rowcolor{rowgray} open\_purchase\_orders\_optional & expected\_receipt\_date & cmd\_achat\_ouvertes\_opt & date\_reception\_prevue \\ \hline
+ open\_purchase\_orders\_optional & status & cmd\_achat\_ouvertes\_opt & statut \\ \hline
+\end{longtable}
+\normalsize
+
+\end{document}
